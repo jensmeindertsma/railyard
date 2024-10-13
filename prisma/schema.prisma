@@ -1,0 +1,21 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Picture {
+  id         Int      @id @default(autoincrement())
+  name       String
+  data       Bytes
+  date_taken DateTime
+  // TODO: more fields:
+  // - spotting location
+  // - more train info like company, series, manufacturer, driven route
+  //      > these fields listed above should probably be models of their own.
+  // - and of course train ID so multiple pictures can be taken of one train
+  // 
+}
