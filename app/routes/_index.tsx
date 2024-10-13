@@ -1,10 +1,24 @@
 import { json, redirect } from "@remix-run/node";
-import { Form, useLoaderData } from "@remix-run/react";
+import { Form, useLoaderData, useNavigation } from "@remix-run/react";
+import { useEffect, useRef } from "react";
 import { database } from "~/database.server";
 import { ActionArguments } from "~/types/remix";
 
 export default function Home() {
   const { pictures } = useLoaderData<typeof loader>();
+
+  const uploadFormRef = useRef<HTMLFormElement>(null);
+  const navigation = useNavigation();
+  const isUploading =
+    navigation.state === "submitting" &&
+    navigation.formData?.get("intent") === "upload";
+
+  useEffect(() => {
+    if (!isUploading) {
+      // Finished uploading, clear the form
+      uploadFormRef.current?.reset();
+    }
+  }, [isUploading]);
 
   return (
     <main>
@@ -14,11 +28,23 @@ export default function Home() {
         {pictures.map((picture) => (
           <li key={picture.id}>
             <h3>{picture.name}</h3>
-            <p>{picture.date_taken}</p>
+            <p>
+              {new Date(picture.date_taken)
+                .toLocaleDateString("en-GB", {
+                  day: "numeric",
+                  weekday: "long",
+                  month: "long",
+                  year: "numeric",
+                })
+                .replace(",", "")}
+            </p>
           </li>
         ))}
       </ul>
-      <Form method="post">
+
+      <Form method="post" ref={uploadFormRef}>
+        <input type="hidden" name="intent" value="upload" />
+
         <h2>New Picture</h2>
 
         <label htmlFor="name">Name</label>
@@ -30,7 +56,9 @@ export default function Home() {
           style={{ display: "block" }}
         />
 
-        <button type="submit">Save new picture</button>
+        <p>TODO: add image uploading here!!!</p>
+
+        <button type="submit">Upload new picture</button>
       </Form>
     </main>
   );
