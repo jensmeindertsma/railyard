@@ -34,6 +34,8 @@ export default function Home() {
         {pictures.map((picture) => (
           <li key={picture.id}>
             <h3>{picture.train.id}</h3>
+            <p>{picture.id}</p>
+            <img src={`/api/pictures/${picture.id}`} width={200} />
             <p>
               {new Date(picture.date_taken)
                 .toLocaleDateString("en-GB", {
@@ -119,8 +121,10 @@ export async function action({ request }: ActionArguments) {
 
   await database.picture.create({
     data: {
+      id: crypto.randomUUID(),
       bytes,
-      filename: picture.name,
+      // strip the `image/` part
+      filetype: mimeType.substring(6),
       date_taken: new Date(rawDate),
       train: {
         connectOrCreate: {

@@ -1,7 +1,7 @@
 -- CreateTable
 CREATE TABLE "Picture" (
-    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    "filename" TEXT NOT NULL,
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "filetype" TEXT NOT NULL,
     "bytes" BLOB NOT NULL,
     "date_taken" DATETIME NOT NULL,
     "trainId" TEXT NOT NULL,

@@ -1,6 +1,5 @@
 import { database } from "~/database.server";
 import type { LoaderArguments } from "~/types/remix";
-import mime from "mime";
 
 export async function loader({ params }: LoaderArguments) {
   const picture = params.picture;
@@ -11,9 +10,10 @@ export async function loader({ params }: LoaderArguments) {
 
   // Find the image by its ID
   const image = await database.picture.findUnique({
-    where: { id: Number() },
+    where: { id: picture },
     select: {
-      filename: true,
+      id: true,
+      filetype: true,
       bytes: true,
     },
   });
@@ -22,14 +22,11 @@ export async function loader({ params }: LoaderArguments) {
     throw new Response("Image not found", { status: 404 });
   }
 
-  // Get the correct MIME type
-  const mimeType = mime.getType(image.filename) || "application/octet-stream";
-
   return new Response(image.bytes, {
     status: 200,
     headers: {
-      "Content-Type": mimeType,
-      "Content-Disposition": `inline; filename="${id}"`,
+      "Content-Type": `image/${image.filetype}`,
+      "Content-Disposition": `inline; filename="${image.id}.${image.filetype}"`,
     },
   });
 }
