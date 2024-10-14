@@ -9,13 +9,48 @@ generator client {
 
 model Picture {
   id         Int      @id @default(autoincrement())
-  name       String
-  data       Bytes
+  filetype   String
+  bytes      Bytes
   date_taken DateTime
-  // TODO: more fields:
-  // - spotting location
-  // - more train info like company, series, manufacturer, driven route
-  //      > these fields listed above should probably be models of their own.
-  // - and of course train ID so multiple pictures can be taken of one train
-  // 
+
+  train   Train  @relation(fields: [trainId], references: [id])
+  trainId String
+
+  service   Service @relation(fields: [serviceId], references: [id])
+  serviceId String
+
+  station   Station @relation(fields: [stationId], references: [name])
+  stationId String
+}
+
+model Train {
+  id       String    @id
+  pictures Picture[]
+
+  series   Series @relation(fields: [seriesId], references: [name])
+  seriesId String
+}
+
+model Series {
+  name   String  @id
+  trains Train[]
+}
+
+model Service {
+  id       String    @id
+  pictures Picture[]
+
+  origin   Station @relation("origin", fields: [originId], references: [name])
+  originId String
+
+  destination   Station @relation("destination", fields: [destinationId], references: [name])
+  destinationId String
+}
+
+model Station {
+  name                   String    @id
+  country                String
+  pictures               Picture[]
+  services_starting_here Service[] @relation("origin")
+  services_ending_here   Service[] @relation("destination")
 }
