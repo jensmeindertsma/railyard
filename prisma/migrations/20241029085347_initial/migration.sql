@@ -1,6 +1,6 @@
 -- CreateTable
 CREATE TABLE "Picture" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "filetype" TEXT NOT NULL,
     "bytes" BLOB NOT NULL,
     "date_taken" DATETIME NOT NULL,
@@ -14,7 +14,30 @@ CREATE TABLE "Picture" (
 
 -- CreateTable
 CREATE TABLE "Train" (
-    "id" TEXT NOT NULL PRIMARY KEY
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "seriesName" TEXT NOT NULL,
+    "versionName" TEXT NOT NULL,
+    "companyName" TEXT NOT NULL,
+    CONSTRAINT "Train_seriesName_fkey" FOREIGN KEY ("seriesName") REFERENCES "Series" ("name") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "Train_versionName_fkey" FOREIGN KEY ("versionName") REFERENCES "Version" ("name") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "Train_companyName_fkey" FOREIGN KEY ("companyName") REFERENCES "Company" ("name") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "Series" (
+    "name" TEXT NOT NULL PRIMARY KEY
+);
+
+-- CreateTable
+CREATE TABLE "Version" (
+    "name" TEXT NOT NULL PRIMARY KEY,
+    "seriesName" TEXT NOT NULL,
+    CONSTRAINT "Version_seriesName_fkey" FOREIGN KEY ("seriesName") REFERENCES "Series" ("name") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "Company" (
+    "name" TEXT NOT NULL PRIMARY KEY
 );
 
 -- CreateTable
