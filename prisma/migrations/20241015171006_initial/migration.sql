@@ -14,14 +14,7 @@ CREATE TABLE "Picture" (
 
 -- CreateTable
 CREATE TABLE "Train" (
-    "id" TEXT NOT NULL PRIMARY KEY,
-    "seriesId" TEXT NOT NULL,
-    CONSTRAINT "Train_seriesId_fkey" FOREIGN KEY ("seriesId") REFERENCES "Series" ("name") ON DELETE RESTRICT ON UPDATE CASCADE
-);
-
--- CreateTable
-CREATE TABLE "Series" (
-    "name" TEXT NOT NULL PRIMARY KEY
+    "id" TEXT NOT NULL PRIMARY KEY
 );
 
 -- CreateTable

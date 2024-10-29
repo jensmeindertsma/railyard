@@ -8,7 +8,7 @@ generator client {
 }
 
 model Picture {
-  id         String   @id
+  id         Int      @id
   filetype   String
   bytes      Bytes
   date_taken DateTime
@@ -26,14 +26,6 @@ model Picture {
 model Train {
   id       String    @id
   pictures Picture[]
-
-  series   Series @relation(fields: [seriesId], references: [name])
-  seriesId String
-}
-
-model Series {
-  name   String  @id
-  trains Train[]
 }
 
 model Service {
