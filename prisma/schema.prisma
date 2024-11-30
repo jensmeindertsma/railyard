@@ -8,6 +8,6 @@ generator client {
 }
 
 model Picture {
-  id         String   @id @default(cuid())
-  date_taken DateTime
+  id   String   @id
+  date DateTime
 }
