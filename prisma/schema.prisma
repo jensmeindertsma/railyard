@@ -8,65 +8,6 @@ generator client {
 }
 
 model Picture {
-  id         Int      @id
-  filetype   String
-  bytes      Bytes
+  id         String   @id @default(cuid())
   date_taken DateTime
-
-  train   Train  @relation(fields: [trainId], references: [id])
-  trainId String
-
-  service   Service @relation(fields: [serviceId], references: [id])
-  serviceId String
-
-  station   Station @relation(fields: [stationId], references: [name])
-  stationId String
-}
-
-model Train {
-  id          String    @id
-  series      Series    @relation(fields: [seriesName], references: [name])
-  seriesName  String
-  version     Version   @relation(fields: [versionName], references: [name])
-  versionName String
-  company     Company   @relation(fields: [companyName], references: [name])
-  companyName String
-  pictures    Picture[]
-}
-
-model Series {
-  name     String    @id
-  versions Version[]
-  trains   Train[]
-}
-
-model Version {
-  name       String  @id
-  series     Series  @relation(fields: [seriesName], references: [name])
-  seriesName String
-  trains     Train[]
-}
-
-model Company {
-  name   String  @id
-  trains Train[]
-}
-
-model Service {
-  id       String    @id
-  pictures Picture[]
-
-  origin   Station @relation("origin", fields: [originId], references: [name])
-  originId String
-
-  destination   Station @relation("destination", fields: [destinationId], references: [name])
-  destinationId String
-}
-
-model Station {
-  name                   String    @id
-  country                String
-  pictures               Picture[]
-  services_starting_here Service[] @relation("origin")
-  services_ending_here   Service[] @relation("destination")
 }

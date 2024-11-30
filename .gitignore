@@ -16,5 +16,5 @@
 # ESLint
 .eslintcache
 
-# SQLite
-/database/
+# Data volume
+/data/
