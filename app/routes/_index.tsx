@@ -110,8 +110,6 @@ async function handlePictureUpload({ name, data }: UploadHandlerPart) {
   if (name === "picture") {
     const id = crypto.randomUUID();
 
-    console.log("new image, generated id: " + id);
-
     const picturesPath = getEnvironmentVariable("PICTURES_DIRECTORY");
     try {
       await fs.access(picturesPath, constants.F_OK);
@@ -125,28 +123,39 @@ async function handlePictureUpload({ name, data }: UploadHandlerPart) {
     }
     const input = Buffer.concat(chunks);
 
-    const startSize = input.length;
+    const initialSize = input.length;
 
     const image = sharp(input);
     const metadata = await image.metadata();
 
-    console.log(
-      `Received image ${metadata.width}x${metadata.height} type = ${metadata.format} size = ${metadata.size} bytes`,
-    );
-    console.warn("TODOL handle EXIF data: " + metadata.exif?.length);
+    const initialWidth = metadata.width;
+    const initialHeight = metadata.height;
+    const initialFormat = metadata.format;
 
-    console.log("compressing....");
+    console.warn("TODO: handle EXIF data: " + metadata.exif?.length);
 
     const output = await image
       .png({
         palette: true,
         compressionLevel: 9,
       })
+      .resize({
+        width: 3840,
+        height: 2160,
+        fit: "cover",
+      })
       .toBuffer();
 
     const finalSize = output.length;
+
+    console.log("--- Processed image ---");
+    console.log(`* initial dimensions = ${initialWidth}x${initialHeight}`);
+    console.log("* initial format = " + initialFormat);
+    console.log(`* initial size = ${initialSize} bytes`);
+    console.log("* assigned id = " + id);
+    console.log(`* final size = ${finalSize} bytes`);
     console.log(
-      `Converted image, start =  ${startSize} final = ${finalSize}, diff = ${startSize - finalSize} bytes = ${((finalSize - startSize) / startSize) * 100}`,
+      `* compression reduced size by ${Math.floor(((finalSize - initialSize) / initialSize) * 100)}%`,
     );
 
     try {
