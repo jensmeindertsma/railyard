@@ -12,3 +12,12 @@ The pictures are stored (compressed) in a persistent data volume (Docker).
 - [ ] Create proper admin dashboard for uploading pictures and modifying metadata
 - [ ] Write (e2e) tests
 - [ ] Better linting rules
+
+## Route tree
+
+- / <shows recent pictures or favourites>
+- /admin
+- /places/amsterdam
+- /places/stroe
+- /trains/siemens/vectron
+- /operators
