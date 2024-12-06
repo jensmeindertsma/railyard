@@ -1,11 +1,12 @@
-import { redirect, Form, useLoaderData, useNavigation } from "react-router";
-import { database } from "~/database.server";
-import { getEnvironmentVariable } from "~/tools/environment.server";
 import path from "node:path";
 import fs, { constants } from "node:fs/promises";
+import { redirect, Form, useLoaderData, useNavigation } from "react-router";
 import sharp from "sharp";
 import { useEffect, useRef } from "react";
-import { type FileUpload, parseFormData } from "@mjackson/form-data-parser";
+import { parseFormData } from "@mjackson/form-data-parser";
+import { getEnvironmentVariable } from "~/tools/environment.server";
+import { database } from "~/database.server";
+import type { FileUpload } from "@mjackson/form-data-parser";
 import type { Route } from "./+types/home";
 
 export default function Home() {

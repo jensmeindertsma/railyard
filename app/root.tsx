@@ -7,10 +7,9 @@ import {
   ScrollRestoration,
   useRouteError,
 } from "react-router";
-import { type ReactNode } from "react";
-import type { Route } from "./+types/root";
-
 import stylesheet from "./root.css?url";
+import type { ReactNode } from "react";
+import type { Route } from "./+types/root";
 
 export function meta({ error }: Route.MetaArgs) {
   return [{ title: error ? "Error!" : "Trains!" }];
