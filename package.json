@@ -1,6 +1,6 @@
 {
   "name": "@jensmeindertsma/railyard",
-  "packageManager": "pnpm@9.14.4",
+  "packageManager": "pnpm@9.15.0",
   "private": true,
   "type": "module",
   "scripts": {
