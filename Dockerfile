@@ -1,4 +1,5 @@
 FROM node:23.3.0-alpine AS base
+RUN apk add vips
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
@@ -16,7 +17,7 @@ COPY package.json pnpm-lock.yaml ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 COPY prisma ./prisma
 RUN pnpm run database:generate
-RUN pnpm prune --prod --no-optional
+RUN pnpm prune --prod
 
 FROM base
 WORKDIR /app
