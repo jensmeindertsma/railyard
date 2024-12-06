@@ -1,4 +1,3 @@
-import "./root.css";
 import {
   isRouteErrorResponse,
   Links,
@@ -7,24 +6,26 @@ import {
   Scripts,
   ScrollRestoration,
   useRouteError,
-} from "@remix-run/react";
+} from "react-router";
 import { type ReactNode } from "react";
-import {
-  type MetaArguments,
-  type LinksResult,
-  type MetaResult,
-} from "~/types/remix";
+import type { Route } from "./+types/root";
 
-export function meta({ error }: MetaArguments): MetaResult {
+import stylesheet from "./root.css?url";
+
+export function meta({ error }: Route.MetaArgs) {
   return [{ title: error ? "Error!" : "Trains!" }];
 }
 
-export function links(): LinksResult {
+export function links(): Route.LinkDescriptors {
   return [
     {
       rel: "icon",
       href: "/favicon.png",
       type: "image/png",
+    },
+    {
+      rel: "stylesheet",
+      href: stylesheet,
     },
   ];
 }

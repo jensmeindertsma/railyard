@@ -3,8 +3,9 @@ on:
   push:
     branches: main
 jobs:
-  build:
+  push:
     runs-on: ubuntu-latest
+    # needs: [e2e]
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -22,5 +23,3 @@ jobs:
 
       - name: Inspect image
         run: docker images
-
-  # TODO: job named `push` or `upgrade` or `upload` that only runs if CI passed

@@ -13,6 +13,9 @@
 # Vite
 /build/
 
+# React Router
+/.react-router/
+
 # ESLint
 .eslintcache
 

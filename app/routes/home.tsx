@@ -1,18 +1,12 @@
-import {
-  redirect,
-  unstable_composeUploadHandlers,
-  unstable_createMemoryUploadHandler,
-  unstable_parseMultipartFormData,
-  UploadHandlerPart,
-} from "@remix-run/node";
-import { Form, useLoaderData, useNavigation } from "@remix-run/react";
+import { redirect, Form, useLoaderData, useNavigation } from "react-router";
 import { database } from "~/database.server";
-import { ActionArguments } from "~/types/remix";
 import { getEnvironmentVariable } from "~/tools/environment.server";
 import path from "node:path";
 import fs, { constants } from "node:fs/promises";
 import sharp from "sharp";
 import { useEffect, useRef } from "react";
+import { type FileUpload, parseFormData } from "@mjackson/form-data-parser";
+import type { Route } from "./+types/home";
 
 export default function Home() {
   const pictures = useLoaderData<typeof loader>();
@@ -70,14 +64,8 @@ export async function loader() {
   return await database.picture.findMany();
 }
 
-export async function action({ request }: ActionArguments) {
-  const formData = await unstable_parseMultipartFormData(
-    request,
-    unstable_composeUploadHandlers(
-      handlePictureUpload,
-      unstable_createMemoryUploadHandler(),
-    ),
-  );
+export async function action({ request }: Route.ActionArgs) {
+  const formData = await parseFormData(request, handlePictureUpload);
 
   const pictureId = formData.get("picture");
 
@@ -106,8 +94,8 @@ export async function action({ request }: ActionArguments) {
   return redirect("/");
 }
 
-async function handlePictureUpload({ name, data }: UploadHandlerPart) {
-  if (name === "picture") {
+async function handlePictureUpload(upload: FileUpload) {
+  if (upload.fieldName === "picture" && upload.type.startsWith("image/")) {
     const id = crypto.randomUUID();
 
     const picturesPath = getEnvironmentVariable("PICTURES_DIRECTORY");
@@ -117,11 +105,9 @@ async function handlePictureUpload({ name, data }: UploadHandlerPart) {
       await fs.mkdir(picturesPath);
     }
 
-    const chunks = [];
-    for await (const chunk of data) {
-      chunks.push(chunk);
-    }
-    const input = Buffer.concat(chunks);
+    console.log("Accepting new image upload");
+    const input = await upload.bytes();
+    console.log("Received new image");
 
     const initialSize = input.length;
 
@@ -142,7 +128,8 @@ async function handlePictureUpload({ name, data }: UploadHandlerPart) {
       .resize({
         width: 3840,
         height: 2160,
-        fit: "cover",
+        fit: "inside",
+        withoutEnlargement: true,
       })
       .toBuffer();
 
@@ -151,11 +138,11 @@ async function handlePictureUpload({ name, data }: UploadHandlerPart) {
     console.log("--- Processed image ---");
     console.log(`* initial dimensions = ${initialWidth}x${initialHeight}`);
     console.log("* initial format = " + initialFormat);
-    console.log(`* initial size = ${initialSize} bytes`);
+    console.log(`* initial size = ${formatBytes(initialSize)}`);
     console.log("* assigned id = " + id);
-    console.log(`* final size = ${finalSize} bytes`);
+    console.log(`* final size = ${formatBytes(finalSize)}`);
     console.log(
-      `* compression reduced size by ${Math.floor(((finalSize - initialSize) / initialSize) * 100)}%`,
+      `* compression reduced size by ${-1 * Math.floor(((finalSize - initialSize) / initialSize) * 100)}%`,
     );
 
     try {
@@ -168,4 +155,16 @@ async function handlePictureUpload({ name, data }: UploadHandlerPart) {
   }
 
   return undefined;
+}
+
+function formatBytes(length: number): string {
+  const units = ["B", "KB", "MB", "GB", "TB"];
+  let index = 0;
+
+  while (length >= 1024 && index < units.length - 1) {
+    length /= 1024;
+    index++;
+  }
+
+  return `${length.toFixed(2)} ${units[index]}`;
 }

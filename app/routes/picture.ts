@@ -1,16 +1,16 @@
-import { LoaderArguments } from "~/types/remix";
 import path from "node:path";
 import fs from "node:fs/promises";
 import { getEnvironmentVariable } from "~/tools/environment.server";
+import type { Route } from "./+types/picture";
 
-export async function loader({ params }: LoaderArguments) {
-  if (!params.id) {
+export async function loader({ params }: Route.LoaderArgs) {
+  if (!params.pictureId) {
     throw new Error("Missing required ID");
   }
 
   const filePath = path.join(
     getEnvironmentVariable("PICTURES_DIRECTORY"),
-    `${params.id}.png`,
+    `${params.pictureId}.png`,
   );
 
   try {
@@ -20,7 +20,7 @@ export async function loader({ params }: LoaderArguments) {
       status: 200,
       headers: {
         "Content-Type": "image/png",
-        "Content-Disposition": `inline; filename="${params.id}.png"`,
+        "Content-Disposition": `inline; filename="${params.pictureId}.png"`,
       },
     });
   } catch (error) {
