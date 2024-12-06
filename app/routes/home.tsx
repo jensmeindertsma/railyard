@@ -27,6 +27,7 @@ export default function Home() {
 
   return (
     <>
+      <h1>Pictures</h1>
       {pictures.length == 0 ? (
         <p>No pictures!</p>
       ) : (
