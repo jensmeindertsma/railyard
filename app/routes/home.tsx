@@ -47,12 +47,18 @@ export default function Home() {
           <h2>Upload Train Picture</h2>
 
           <label htmlFor="picture">Choose picture to upload</label>
-          <input type="file" id="picture" name="picture" accept="image/*" />
+          <input
+            type="file"
+            id="picture"
+            name="picture"
+            accept="image/*"
+            required
+          />
 
           <label htmlFor="date">
             Enter the date when the picture was taken
           </label>
-          <input type="date" id="date" name="date" />
+          <input type="date" id="date" name="date" required />
 
           <button type="submit">Upload New Train Picture</button>
           {isUploading ? <em>uploading........</em> : null}
