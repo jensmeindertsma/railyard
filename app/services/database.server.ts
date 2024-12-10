@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { getEnvironmentVariable } from "./tools/environment.server";
+import { getEnvironmentVariable } from "./environment.server";
 
 getEnvironmentVariable("DATABASE_URL");
 

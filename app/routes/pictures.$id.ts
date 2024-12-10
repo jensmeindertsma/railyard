@@ -1,7 +1,7 @@
 import path from "node:path";
 import fs from "node:fs/promises";
-import { getEnvironmentVariable } from "~/tools/environment.server";
-import type { Route } from "./+types/picture";
+import { getEnvironmentVariable } from "~/services/environment.server";
+import type { Route } from "./+types/pictures.$id";
 
 export async function loader({ params }: Route.LoaderArgs) {
   if (!params.pictureId) {
@@ -26,10 +26,10 @@ export async function loader({ params }: Route.LoaderArgs) {
   } catch (error) {
     if (error instanceof Error) {
       if (error.message.includes("ENOENT")) {
-        throw new Response("Image not found", { status: 404 });
+        throw Response.json({ error: "image not found" }, { status: 404 });
       }
       console.error("Error loading image:", error);
-      throw new Response("Internal Server Error", { status: 500 });
+      throw Response.json({ error: "internal Server Error" }, { status: 500 });
     }
   }
 }

@@ -8,7 +8,7 @@
     "build:prepare": "prisma generate",
     "build:app": "react-router build",
     "build:server": "tsx ./scripts/build-server.ts",
-    "clean": "rimraf ./build",
+    "clean": "rimraf ./build ./.react-router",
     "database:generate": "prisma generate",
     "database:migrate": "prisma migrate dev",
     "database:reset": "prisma migrate reset",
