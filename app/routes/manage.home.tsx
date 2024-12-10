@@ -12,6 +12,9 @@ export default function Home({ loaderData }: Route.ComponentProps) {
             <li>
               <Link to="/manage/new">New</Link>
             </li>
+            <li>
+              <Link to="/manage/files">Manage Files</Link>
+            </li>
           </ul>
           <Form method="POST">
             <input type="hidden" name="intent" value="quit" />

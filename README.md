@@ -15,3 +15,9 @@ My train spotting collections beautifully displayed and organized.
      -p 5555:5555 \
      railyard
    ```
+
+## To Do
+
+- [x] Allow uploading of images
+- [ ] Allow managing of files
+- [ ] Allow categorization of images
