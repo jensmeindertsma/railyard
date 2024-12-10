@@ -6,14 +6,13 @@ import sharp from "sharp";
 import { getSession } from "~/services/session.server";
 import { database } from "~/services/database.server";
 import { getEnvironmentVariable } from "~/services/environment.server";
-import type { FileUpload } from "@mjackson/form-data-parser";
 import type { Route } from "./+types/manage.new";
 
 export function meta() {
   return [{ title: "Login" }];
 }
 
-export default function New() {
+export default function New({ actionData }: Route.ComponentProps) {
   const navigation = useNavigation();
   const isUploading =
     navigation.state === "submitting" &&
@@ -26,6 +25,41 @@ export default function New() {
       formRef.current?.reset();
     }
   }, [isUploading]);
+
+  if (actionData?.stage === "details") {
+    const {
+      initialFormat,
+      initialHeight,
+      initialWidth,
+      initialSize,
+      finalSize,
+    } = actionData.optimization;
+    return (
+      <>
+        <img src={actionData.preview} width={300} />
+        <ul>
+          <li>Initial format = {initialFormat}</li>
+          <li>Initial width = {initialWidth}</li>
+          <li>Initial height = {initialHeight}</li>
+          <li>Initial size = {formatBytes(initialSize)}</li>
+          <li>Final size = {formatBytes(finalSize)}</li>
+          <li>
+            Optimization savings ={formatBytes(initialSize - finalSize)} =
+            {-1 * Math.floor(((finalSize - initialSize) / initialSize) * 100)}%
+          </li>
+        </ul>
+        <Form method="POST">
+          <input type="hidden" name="intent" value="save" />
+          <input type="hidden" name="id" value={actionData.imageId} />
+
+          <label htmlFor="date">Date</label>
+          <input type="date" id="date" name="date" required />
+
+          <button type="submit">Save</button>
+        </Form>
+      </>
+    );
+  }
 
   return (
     <Form method="POST" encType="multipart/form-data" ref={formRef}>
@@ -41,9 +75,6 @@ export default function New() {
           accept="image/*"
           required
         />
-
-        <label htmlFor="date">Enter the date when the picture was taken</label>
-        <input type="date" id="date" name="date" required />
 
         <button type="submit">Upload New Train Picture</button>
         {isUploading ? <em>uploading........</em> : null}
@@ -63,26 +94,81 @@ export async function action({ request }: Route.ActionArgs) {
   const intent = formData.get("intent");
 
   if (!intent || typeof intent !== "string") {
-    return data({ error: "Missing field `intent`" }, { status: 400 });
+    throw data({ error: "Missing field `intent`" }, { status: 400 });
   }
 
   switch (intent) {
     case "upload": {
-      const pictureId = formData.get("picture");
+      const file = formData.get("picture");
 
-      if (!pictureId || typeof pictureId !== "string") {
-        return data({ error: "Missing field `pictureId`" }, { status: 400 });
+      if (!(file instanceof File)) {
+        throw data(
+          { error: "Field `picture` must be of type `File`" },
+          { status: 400 },
+        );
+      }
+
+      // (1) Ensure picture directory exists
+      const picturesPath = getEnvironmentVariable("PICTURES_DIRECTORY");
+      try {
+        await fs.access(picturesPath, constants.F_OK);
+      } catch {
+        await fs.mkdir(picturesPath);
+      }
+      // (1) ---
+
+      // (2) Get image and optimise
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      const { image, metadata } = await optimiseImage(bytes);
+
+      const initialSize = bytes.length;
+      const initialWidth = metadata.width;
+      const initialHeight = metadata.height;
+      const initialFormat = metadata.format;
+      const finalSize = image.length;
+
+      const imageId = crypto.randomUUID();
+
+      try {
+        await fs.writeFile(path.join(picturesPath, `${imageId}.png`), image);
+      } catch (error) {
+        console.error(`Failed to save file: ${error}`);
+      }
+
+      const base64Iimage = image.toString("base64");
+      const mimeType = "image/png";
+      const dataUrl = `data:${mimeType};base64,${base64Iimage}`;
+
+      return data({
+        stage: "details" as const,
+        preview: dataUrl,
+        imageId,
+        optimization: {
+          initialSize,
+          initialWidth,
+          initialHeight,
+          initialFormat,
+          finalSize,
+        },
+      });
+    }
+
+    case "save": {
+      const id = formData.get("id");
+
+      if (!id || typeof id !== "string") {
+        throw data({ error: "Missing field `id`" }, { status: 400 });
       }
 
       const date = formData.get("date");
 
       if (!date || typeof date !== "string") {
-        return data({ error: "Missing field `date`" }, { status: 400 });
+        throw data({ error: "Missing field `date`" }, { status: 400 });
       }
 
       await database.picture.create({
         data: {
-          id: pictureId,
+          id,
           date: new Date(date),
         },
       });
@@ -91,36 +177,17 @@ export async function action({ request }: Route.ActionArgs) {
     }
 
     default: {
-      return data({ error: "Unknown form intent" }, { status: 400 });
+      throw data({ error: "Unknown form intent" }, { status: 400 });
     }
   }
 }
 
-async function handlePictureUpload(upload: FileUpload) {
-  if (upload.fieldName === "picture" && upload.type.startsWith("image/")) {
-    const id = crypto.randomUUID();
+async function optimiseImage(input: Uint8Array) {
+  const image = sharp(input);
 
-    const picturesPath = getEnvironmentVariable("PICTURES_DIRECTORY");
-    try {
-      await fs.access(picturesPath, constants.F_OK);
-    } catch {
-      await fs.mkdir(picturesPath);
-    }
-
-    const input = await upload.bytes();
-
-    const initialSize = input.length;
-
-    const image = sharp(input);
-    const metadata = await image.metadata();
-
-    const initialWidth = metadata.width;
-    const initialHeight = metadata.height;
-    const initialFormat = metadata.format;
-
-    console.warn("TODO: handle EXIF data: " + metadata.exif?.length);
-
-    const output = await image
+  return {
+    metadata: await image.metadata(),
+    image: await image
       .png({
         palette: true,
         compressionLevel: 9,
@@ -131,30 +198,8 @@ async function handlePictureUpload(upload: FileUpload) {
         fit: "inside",
         withoutEnlargement: true,
       })
-      .toBuffer();
-
-    const finalSize = output.length;
-
-    console.log("--- Processed image ---");
-    console.log(`* initial dimensions = ${initialWidth}x${initialHeight}`);
-    console.log("* initial format = " + initialFormat);
-    console.log(`* initial size = ${formatBytes(initialSize)}`);
-    console.log("* assigned id = " + id);
-    console.log(`* final size = ${formatBytes(finalSize)}`);
-    console.log(
-      `* compression reduced size by ${-1 * Math.floor(((finalSize - initialSize) / initialSize) * 100)}%`,
-    );
-
-    try {
-      await fs.writeFile(path.join(picturesPath, `${id}.png`), output);
-    } catch (error) {
-      console.error(`Failed to save file: ${error}`);
-    }
-
-    return id;
-  }
-
-  return undefined;
+      .toBuffer(),
+  };
 }
 
 function formatBytes(length: number): string {

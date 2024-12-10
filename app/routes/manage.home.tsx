@@ -1,4 +1,4 @@
-import { redirect, Form, data } from "react-router";
+import { redirect, Form, data, Link } from "react-router";
 import { database } from "~/services/database.server";
 import { getSession } from "~/services/session.server";
 import type { Route } from "./+types/manage.home";
@@ -6,11 +6,20 @@ import type { Route } from "./+types/manage.home";
 export default function Home({ loaderData }: Route.ComponentProps) {
   return (
     <>
-      <Form method="POST">
-        <input type="hidden" name="intent" value="quit" />
+      <header>
+        <nav>
+          <ul>
+            <li>
+              <Link to="/manage/new">New</Link>
+            </li>
+          </ul>
+          <Form method="POST">
+            <input type="hidden" name="intent" value="quit" />
 
-        <button type="submit">Quit</button>
-      </Form>
+            <button type="submit">Quit</button>
+          </Form>
+        </nav>
+      </header>
       <ul>
         {loaderData.pictures.map((picture) => (
           <li key={picture.id}>
