@@ -34,4 +34,4 @@ jobs:
         run: docker save railyard:latest | gzip | ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} docker load
 
       - name: Run redeploy script
-        run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} sudo /usr/bin/bash /home/github/redeploy.sh railyard
+        run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} sudo /bin/bash /home/github/redeploy.sh railyard
