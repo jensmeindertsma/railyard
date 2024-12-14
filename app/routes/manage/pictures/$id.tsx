@@ -1,14 +1,14 @@
 import { enforceAuthentication } from "~/services/session.server";
-import type { Route } from "./+types/files";
+import type { Route } from "../+types/files";
 
 export function meta() {
-  return [{ title: "Files" }];
+  return [{ title: "Edit Picture" }];
 }
 
-export default function Files() {
+export default function Edit() {
   return (
     <>
-      <h1>Files</h1>
+      <h1>Edit</h1>
     </>
   );
 }

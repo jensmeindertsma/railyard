@@ -5,13 +5,13 @@ import sharp from "sharp";
 import { enforceAuthentication } from "~/services/session.server";
 import { database } from "~/services/database.server";
 import { getEnvironmentVariable } from "~/services/environment.server";
-import type { Route } from "./+types/upload";
+import type { Route } from "../+types/upload";
 
 export function meta() {
   return [{ title: "Upload" }];
 }
 
-export default function Upload() {
+export default function Upload({ actionData }: Route.ComponentProps) {
   const navigation = useNavigation();
   const isUploading = navigation.state === "submitting";
 
@@ -33,6 +33,12 @@ export default function Upload() {
       </fieldset>
     </Form>
   );
+}
+
+export async function loader({ request }: Route.ActionArgs) {
+  await enforceAuthentication(request);
+
+  return null;
 }
 
 export async function action({ request }: Route.ActionArgs) {

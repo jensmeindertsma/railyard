@@ -16,7 +16,7 @@ export default function Manage() {
               <Link to="/manage/files">Files</Link>
             </li>
             <li>
-              <Link to="/manage/new">Upload</Link>
+              <Link to="/manage/upload">Upload</Link>
             </li>
           </ul>
         </nav>
@@ -28,6 +28,12 @@ export default function Manage() {
       <Outlet />
     </>
   );
+}
+
+export async function loader({ request }: Route.ActionArgs) {
+  await enforceAuthentication(request);
+
+  return null;
 }
 
 export async function action({ request }: Route.ActionArgs) {
