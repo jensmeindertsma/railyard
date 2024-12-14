@@ -1,5 +1,5 @@
 import { database } from "~/services/database.server";
-import type { Route } from "./+types/home";
+import type { Route } from "./+types/index";
 
 export default function Home({ loaderData: pictures }: Route.ComponentProps) {
   return (

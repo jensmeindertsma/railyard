@@ -14,33 +14,43 @@ const cookie = createCookie("railyard", {
 
 const sessionStorage = createCookieSessionStorage({ cookie });
 
-export async function getSession(request: Request) {
+export async function enforceAuthentication(request: Request) {
   const session = await sessionStorage.getSession(
     request.headers.get("Cookie"),
   );
 
-  if (session.get("admin") == true) {
-    return {
-      isAuthenticated: true as const,
-      async destroy({ redirectTo }: { redirectTo: string }) {
-        return redirect(redirectTo, {
-          headers: {
-            "Set-Cookie": await sessionStorage.destroySession(session),
-          },
-        });
-      },
-    };
-  } else {
-    return {
-      isAuthenticated: false as const,
-      async authenticate({ redirectTo }: { redirectTo: string }) {
-        session.set("admin", true);
-        return redirect(redirectTo, {
-          headers: {
-            "Set-Cookie": await sessionStorage.commitSession(session),
-          },
-        });
-      },
-    };
+  if (session.get("admin") !== true) {
+    throw redirect("/login");
   }
+
+  return {
+    async destroy({ redirectTo }: { redirectTo: string }) {
+      return redirect(redirectTo, {
+        headers: {
+          "Set-Cookie": await sessionStorage.destroySession(session),
+        },
+      });
+    },
+  };
+}
+
+export async function redirectAuthenticatedUser(request: Request) {
+  const session = await sessionStorage.getSession(
+    request.headers.get("Cookie"),
+  );
+
+  if (session.get("admin") === true) {
+    throw redirect("/manage");
+  }
+
+  return {
+    async authenticate({ redirectTo }: { redirectTo: string }) {
+      session.set("admin", true);
+      return redirect(redirectTo, {
+        headers: {
+          "Set-Cookie": await sessionStorage.commitSession(session),
+        },
+      });
+    },
+  };
 }

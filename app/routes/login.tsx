@@ -1,7 +1,7 @@
-import { data, Form, redirect, useNavigation } from "react-router";
-import { getSession } from "~/services/session.server";
+import { data, Form, useNavigation } from "react-router";
+import { redirectAuthenticatedUser } from "~/services/session.server";
 import { getEnvironmentVariable } from "~/services/environment.server";
-import type { Route } from "./manage/+types/login";
+import type { Route } from "./+types/login";
 
 export function meta() {
   return [{ title: "Login" }];
@@ -27,21 +27,13 @@ export default function Login({ actionData }: Route.ComponentProps) {
 }
 
 export async function loader({ request }: Route.LoaderArgs) {
-  const session = await getSession(request);
-
-  if (session.isAuthenticated) {
-    return redirect("/manage");
-  }
+  await redirectAuthenticatedUser(request);
 
   return null;
 }
 
 export async function action({ request }: Route.ActionArgs) {
-  const session = await getSession(request);
-
-  if (session.isAuthenticated) {
-    throw redirect("/manage");
-  }
+  const session = await redirectAuthenticatedUser(request);
 
   const formData = await request.formData();
   const password = formData.get("password");

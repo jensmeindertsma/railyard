@@ -1,69 +1,22 @@
 import fs, { constants } from "node:fs/promises";
 import path from "node:path";
 import { data, Form, redirect, useNavigation } from "react-router";
-import { useEffect, useRef } from "react";
 import sharp from "sharp";
-import { getSession } from "~/services/session.server";
+import { enforceAuthentication } from "~/services/session.server";
 import { database } from "~/services/database.server";
 import { getEnvironmentVariable } from "~/services/environment.server";
-import type { Route } from "./+types/manage.new";
+import type { Route } from "./+types/upload";
 
 export function meta() {
-  return [{ title: "Login" }];
+  return [{ title: "Upload" }];
 }
 
-export default function New({ actionData }: Route.ComponentProps) {
+export default function Upload() {
   const navigation = useNavigation();
-  const isUploading =
-    navigation.state === "submitting" &&
-    navigation.formData?.get("intent") === "upload";
-
-  const formRef = useRef<HTMLFormElement>(null);
-
-  useEffect(() => {
-    if (!isUploading) {
-      formRef.current?.reset();
-    }
-  }, [isUploading]);
-
-  if (actionData?.stage === "details") {
-    const {
-      initialFormat,
-      initialHeight,
-      initialWidth,
-      initialSize,
-      finalSize,
-    } = actionData.optimization;
-    return (
-      <>
-        <img src={actionData.preview} width={300} />
-        <ul>
-          <li>Initial format = {initialFormat}</li>
-          <li>Initial width = {initialWidth}</li>
-          <li>Initial height = {initialHeight}</li>
-          <li>Initial size = {formatBytes(initialSize)}</li>
-          <li>Final size = {formatBytes(finalSize)}</li>
-          <li>
-            Optimization savings ={formatBytes(initialSize - finalSize)} =
-            {-1 * Math.floor(((finalSize - initialSize) / initialSize) * 100)}%
-          </li>
-        </ul>
-        <Form method="POST">
-          <input type="hidden" name="intent" value="save" />
-          <input type="hidden" name="id" value={actionData.imageId} />
-
-          <label htmlFor="date">Date</label>
-          <input type="date" id="date" name="date" required />
-
-          <button type="submit">Save</button>
-        </Form>
-      </>
-    );
-  }
+  const isUploading = navigation.state === "submitting";
 
   return (
-    <Form method="POST" encType="multipart/form-data" ref={formRef}>
-      <input type="hidden" name="intent" value="upload" />
+    <Form method="POST" encType="multipart/form-data">
       <fieldset disabled={isUploading}>
         <h2>Upload Train Picture</h2>
 
@@ -76,19 +29,14 @@ export default function New({ actionData }: Route.ComponentProps) {
           required
         />
 
-        <button type="submit">Upload New Train Picture</button>
-        {isUploading ? <em>uploading........</em> : null}
+        <button type="submit">{isUploading ? "Uploading..." : "Upload"}</button>
       </fieldset>
     </Form>
   );
 }
 
 export async function action({ request }: Route.ActionArgs) {
-  const session = await getSession(request);
-
-  if (!session.isAuthenticated) {
-    throw redirect("/login");
-  }
+  await enforceAuthentication(request);
 
   const formData = await request.formData();
   const intent = formData.get("intent");
@@ -200,16 +148,4 @@ async function optimiseImage(input: Uint8Array) {
       })
       .toBuffer(),
   };
-}
-
-function formatBytes(length: number): string {
-  const units = ["B", "KB", "MB", "GB", "TB"];
-  let index = 0;
-
-  while (length >= 1024 && index < units.length - 1) {
-    length /= 1024;
-    index++;
-  }
-
-  return `${length.toFixed(2)} ${units[index]}`;
 }
