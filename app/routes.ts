@@ -6,7 +6,7 @@ export default [
 
   route("login", "routes/login.tsx"),
 
-  route("pictures/:pictureId", "routes/pictures.$id.ts"),
+  route("files/:pictureId", "routes/files.$id.ts"),
 
   route("manage", "routes/manage/layout.tsx", [
     index("routes/manage/index.tsx"),

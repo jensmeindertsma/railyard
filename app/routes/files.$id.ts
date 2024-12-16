@@ -1,7 +1,7 @@
 import path from "node:path";
 import fs from "node:fs/promises";
 import { getEnvironmentVariable } from "~/services/environment.server";
-import type { Route } from "./+types/pictures.$id";
+import type { Route } from "./+types/files.$id";
 
 export async function loader({ params }: Route.LoaderArgs) {
   if (!params.pictureId) {
