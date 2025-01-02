@@ -5,14 +5,14 @@ import morgan from "morgan";
 const BUILD_PATH = "../build/server/index.js";
 const PORT = Number.parseInt(process.env.PORT || "3000");
 
+console.info("(RAILYARD) Starting production server ...");
+
 const app = express();
 
 app.use(compression());
 app.use(morgan("tiny"));
 
 app.disable("x-powered-by");
-
-console.info("starting production server");
 
 app.use(
   "/assets",
@@ -21,8 +21,10 @@ app.use(
 
 app.use(express.static("build/client"));
 
+console.info("(RAILYARD) Loading application build output ...");
+
 app.use(await import(BUILD_PATH).then((mod) => mod.app));
 
 app.listen(PORT, () => {
-  console.log(`listening on http://localhost:${PORT}`);
+  console.info(`(RAILYARD) Listening on http://localhost:${PORT}`);
 });

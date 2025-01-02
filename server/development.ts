@@ -3,13 +3,15 @@ import morgan from "morgan";
 
 const PORT = Number.parseInt(process.env.PORT || "3000");
 
+console.info("(RAILYARD) Starting development server ...");
+
 const app = express();
 
 app.use(morgan("tiny"));
 
 app.disable("x-powered-by");
 
-console.info("starting development server");
+console.info("(RAILYARD) Loading Vite ...");
 
 const viteDevServer = await import("vite").then((vite) =>
   vite.createServer({
@@ -18,6 +20,8 @@ const viteDevServer = await import("vite").then((vite) =>
 );
 
 app.use(viteDevServer.middlewares);
+
+console.info("(RAILYARD) Setting up application request handler ...");
 
 app.use(async (request, response, next) => {
   try {
@@ -32,5 +36,5 @@ app.use(async (request, response, next) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`listening on http://localhost:${PORT}`);
+  console.info(`(RAILYARD) Listening on http://localhost:${PORT}`);
 });
