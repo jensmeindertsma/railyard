@@ -1,0 +1,16 @@
+{
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma"
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.tabSize": 2,
+  "eslint.options": {
+    "flags": ["unstable_ts_config"]
+  },
+  "eslint.useFlatConfig": true,
+  "prettier.configPath": "prettierrc.json"
+}
